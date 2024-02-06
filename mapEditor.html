@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/src/css/app.css">
+    <title>App</title>
+   
+</head>
+<body>
+    <div id="mainDisplayContainer">
+        <div id="mainDisplay">
+            <canvas id="mainCanvas" width="320" height="180" ></canvas>
+        </div>
+    </div>
+    <script type="module">
+        import { aspectRatio } from './src/js/config.js'; 
+
+        function resizeDisplay() {
+            const container = document.getElementById('mainDisplay');
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+
+            // Determine the aspect ratio of the canvas
+            const currentAspectRatio =width/height;
+            
+            // Determine orientation
+            if(aspectRatio>currentAspectRatio){
+                // Portrait
+                container.style.width = width + "px";
+                container.style.height = width/aspectRatio + "px";
+            }
+            else{
+                // Landscape
+                container.style.width = height*aspectRatio + "px";
+                container.style.height = height + "px";
+            }
+
+        }
+
+        // Call resizeCanvas initially and whenever the window size changes
+        window.addEventListener('resize', resizeDisplay);
+        resizeDisplay();
+    </script>
+    <script type="module" src="./src/js/tools/mapEditor/mapEditor.js"></script>
+</body>
+</html>
