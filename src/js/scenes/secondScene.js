@@ -1,49 +1,54 @@
 
 import Scene from './scene.js';
 import Sprite from "../objects/sprite.js";
-import { mapBoundry } from '../boundryLayers/tinyMap.js';
-import GameObject from '../objects/gameObject.js';
+import { mapBoundry } from '../boundryLayers/largeMap.js';
 import CharacterController from '../controllers/characterController.js';
 import Boundry from '../objects/boundry.js';
+import { displayOffset, displaySize } from '../config.js';
 
 export default class startScene extends Scene{
 
     constructor(config) {
         super(config);
-        this.mainCanvas = document.getElementById('mainCanvas');
-        this.ctx = mainCanvas.getContext('2d');
         this.CharacterController = new CharacterController({scene: this});
         this.boundryLayer = mapBoundry;
         this.staticBoundries = {};
         this.sceneObjects = {};
-        this.boudries = true;
- 
+        this.boundries = true;
         this.timeStamp = Date.now();
         this.playerSpeed = 0.07;
+        
+
+        
 
         this.init();
     }
 
+    cleanUp() {
+        super.cleanUp();
+        this.CharacterController = undefined;
+    }
+
     contructSceneObjects() {
         this.map = new Sprite({
-            position: {x:-20, y: -20},
             image: "/src/img/tinyMap.png"
         })
         
 
         this.player = new Sprite({
             parent: this.map,
+            position: {x:-46, y:-3},
             image: "/src/img/grass1.png"
         })
 
         const door = new Boundry({   
             parent: this.map,
-            event: "window",
+            event: {type:"door", dest:"startScene"} ,
             boundry: {
-                "left": 192,
+                "left": 104,
                 "top": 80,
-                "right": 208,
-                "bottom": 96
+                "right": 105,
+                "bottom": 95
             }
         });
 
@@ -58,7 +63,7 @@ export default class startScene extends Scene{
         
         this.map.draw()
         this.player.draw()
-        if(this.boudries){
+        if(this.boundries){
             this.drawBoundries();
         }
     }
@@ -66,15 +71,25 @@ export default class startScene extends Scene{
     // Fires when any input is detected
     input(input){
         if(input.code === "KeyB"){
-            if(this.boudries){
-                this.boudries = false;
+            if(this.boundries){
+                this.boundries = false;
             }
             else{
-                this.boudries = true;
+                this.boundries = true;
             }
         }
         
-        if(input.code === "BracketRight"){
+        if(input.code === "KeyP"){ //debugging
+            console.log(this.map.boundingRect)
+        }           
+        if(input.code === "KeyC"){ //debugging
+            this.CharacterController.isEnabled = false;
+        }        
+        if(input.code === "KeyV"){ //debugging
+            this.CharacterController.isEnabled = true;
+        }
+        
+        if(input.code === "BracketRight"){ //debugging
             window.open('/mapEditor', '_blank');
         }
     }
@@ -124,13 +139,70 @@ export default class startScene extends Scene{
         }
     }
 
+    // Try to center map on player location
+    centerMap() {
+        if(!this.map.imageLoaded){
+            setTimeout(()=>this.centerMap(), 10)
+            return;
+        }
+        //this.animationLoop();
+       
+        
+        console.log("centering map", this.player.position, this.player.localPosition, this.player.origin)
+        console.log(this.map.position, this.map.localPosition, this.map.origin)
+        let mapX = -this.player.localPosition.x;
+        let mapY = -this.player.localPosition.y;
+        let overFlowX = 0;
+        let overFlowY = 0;
+        let centerX = 0;
+        let centerY = 0;
+        this.map.position = { x: mapX, y: mapY }
 
+        if(this.map.boundingRect.top > -1){
+            overFlowY -= this.map.boundingRect.top;
+            centerY++;
+            console.log('here')
+        }
+    
+        if(this.map.boundingRect.bottom < displaySize.y+1){
+            overFlowY += displaySize.y-this.map.boundingRect.bottom;
+            centerY++;
+            console.log('here1')
+        }
+        
+        if(this.map.boundingRect.left > -1){
+            overFlowX -= this.map.boundingRect.left;
+            centerX++;
+            console.log('here2')
+        }
+        
+         if(this.map.boundingRect.right < displaySize.x+1){
+            overFlowX += displaySize.x-this.map.boundingRect.right;
+            centerX++;
+            console.log('here3')
+        }
+        if(centerX === 2){
+            overFlowX = this.player.localPosition.x;
+            console.log('overflowx')
+        }
+        if(centerY === 2){
+            overFlowY = this.player.localPosition.y;
+            console.log('overflowy')
+        }
+      
+        this.map.position = {
+            x: this.map.localPosition.x + overFlowX,
+            y: this.map.localPosition.y + overFlowY
+        }
+       
+        this.animationLoop();
+    }
 
     // Initialization 
     init(){
         this.contructSceneObjects();
-        this.animationLoop();
         this.createStaticBoundries();
+        this.centerMap();
     }
 
     // Runs the update loop

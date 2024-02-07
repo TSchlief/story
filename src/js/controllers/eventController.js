@@ -4,18 +4,17 @@ import InputController from "./inputController.js";
 export default class EventController {
     constructor() {
         this.inputController = new InputController();
+        
         this.scene = undefined;
         this.loadScene("startScene");
     }
 
-    triggerEvent(eventName) {
-        console.log(eventName)
-        if(eventName === "door"){
-            this.loadScene("secondScene")
+    triggerEvent(event) {
+        console.log(event)
+        if(event.type === "door"){
+            this.loadScene(event.dest)
         }
-        if(eventName === "window"){
-            this.loadScene("startScene")
-        }
+        
     }
 
     loadScene(sceneName){

@@ -8,6 +8,10 @@ const port = 3000;
 const __dir = dirname(fileURLToPath(import.meta.url));
 
 expressApp.use(express.static(__dir));
+expressApp.use((req, res, next) => {
+    res.setHeader('Cache-Control', 'no-cache');
+    next();
+});
 
 expressApp.listen(port, (e)=> {
     if(e) throw e;

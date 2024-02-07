@@ -3,8 +3,8 @@ import { displaySize } from "../config.js";
 export default class InputController {
     constructor(config){
         this.remote = undefined;
-        this.canvasCoords = {};
-        this.localCoords = {};
+        this.canvasCoords = {x:0,y:0};
+        this.localCoords = {x:0,y:0};
         this.pressedKeys = {};
         this.keyMap = {
             'ArrowUp': 'up',

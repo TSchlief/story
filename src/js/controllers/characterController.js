@@ -9,7 +9,6 @@ export default class CharacterController{
     }
 
     update(dt){
-        
         // Check if controller is enabled
         if(!this.isEnabled) return;
 

@@ -3,7 +3,7 @@ import GameObject from "./gameObject.js";
 export default class Boundry extends GameObject{
     constructor(config){
         super(config)
-        
+        this.origin = this.parent.origin;
         const width = config.boundry.right - config.boundry.left;
         const height = config.boundry.bottom - config.boundry.top;
         const globalX = config.boundry.left + (width/2);
@@ -16,6 +16,7 @@ export default class Boundry extends GameObject{
         this.traversable = config.traversable;
 
         this.event = config.event || undefined; // Used for calling events
+        
     }
 
 

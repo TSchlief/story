@@ -15,32 +15,32 @@ export default class Sprite extends GameObject {
                 
             })();
         }
-        
+        this.imageLoaded = false;
         this.image = new Image();
         this.image.src = config.image;
-        this.size = config.size;
-        this.image.onload = (()=>{
-            if(!this.size){ 
-                this.size = {width: this.image.width, height: this.image.height}; 
-            
-                this.boundingRect.top = this._position.y - (this.size.height/2),
-                this.boundingRect.left = this._position.x - (this.size.width/2),
-                this.boundingRect.bottom = this._position.y + (this.size.height/2),
-                this.boundingRect.right = this._position.x + (this.size.width/2)
-            }
-        })()
+        this.size = config.size || {width: 0, height: 0};
+        this.image.onload = ()=>{
+            console.log('imageLoaded')
+            this.size.width = this.image.width;
+            this.size.height = this.image.height;
         
+            this.boundingRect.top = this._position.y - (this.size.height/2),
+            this.boundingRect.left = this._position.x - (this.size.width/2),
+            this.boundingRect.bottom = this._position.y + (this.size.height/2),
+            this.boundingRect.right = this._position.x + (this.size.width/2)
+            this.imageLoaded = true;
+        }
     }
 
 
     draw(ctx = this.ctx) {
-
+        
         const width = this.size.width;
         const height = this.size.height;
         
 
         if(ctx){
-            ctx.globalAlpha = 0.5;
+            ctx.globalAlpha = 1;
             ctx.drawImage(
                 this.image,
                 0,
@@ -55,5 +55,6 @@ export default class Sprite extends GameObject {
             
             ctx.globalAlpha = 1;
         }
+        
     }
 }

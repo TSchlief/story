@@ -19,7 +19,7 @@ export default class GameObject {
     }
 
     
-    
+   /* 
     // Sets the objects position relative to its origin
     set position(position){
         this._localPosition = position;
@@ -38,7 +38,7 @@ export default class GameObject {
             child.position = child._localPosition;
         }
     }
-    
+    */
     // Returns position relative to center of the canvas
     get position(){
         return this._position;
