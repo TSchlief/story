@@ -14,7 +14,7 @@ export default class startScene extends Scene{
         this.boundryLayer = mapBoundry;
         this.staticBoundries = {};
         this.sceneObjects = {};
-        this.boundries = true;
+        this.boundries = false;
         this.timeStamp = Date.now();
         this.playerSpeed = 0.07;
         
@@ -37,7 +37,7 @@ export default class startScene extends Scene{
 
         this.player = new Sprite({
             parent: this.map,
-            position: {x:-46, y:-3},
+            position: {x:0, y:0},
             image: "/src/img/grass1.png"
         })
 

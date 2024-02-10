@@ -10,30 +10,53 @@
 <body>
     <div id="mainDisplayContainer">
         <div id="mainDisplay">
-            <canvas id="mainCanvas" width="320" height="180" ></canvas>
+            <canvas id="mainCanvas" width="640" height="360" ></canvas>
+            <div id="dialogWrapper">
+                <div id="dialogContainer">
+                    <div id="dialogBox">
+                        <p class="dialog" id="dialogText"></p>
+                        <div class="optionContainer">
+                            <div class="optionSelect" id="optionSelect1"></div>
+                            <span class="dialog" id="option1"></span>
+                        </div>ds
+                        <div class="optionContainer">
+                            <div class="optionSelect" id="optionSelect2"></div>
+                            <span class="dialog" id="option2"></span>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     <script type="module">
         import { aspectRatio } from './src/js/config.js'; 
+        const dialogWrapper = document.getElementById('dialogWrapper');
+        dialogWrapper.style.display = "none"
 
         function resizeDisplay() {
+        const dialogBox = document.getElementById('dialogBox');
             const container = document.getElementById('mainDisplay');
             const width = window.innerWidth;
             const height = window.innerHeight;
+            const fontSize = 3;
 
             // Determine the aspect ratio of the canvas
             const currentAspectRatio =width/height;
             
             // Determine orientation
             if(aspectRatio>currentAspectRatio){
-                // Portrait
+                // Portrait window 
                 container.style.width = width + "px";
                 container.style.height = width/aspectRatio + "px";
+                dialogBox.style.fontSize = fontSize +"vw";
             }
             else{
-                // Landscape
+                
+                // Landscape window
                 container.style.width = height*aspectRatio + "px";
                 container.style.height = height + "px";
+                dialogBox.style.fontSize = fontSize*aspectRatio + "vh";
             }
 
         }

@@ -15,9 +15,20 @@ export default class CharacterController{
         this.playerMovement(dt);
     }
 
-    detectCollision(objectGroup){
-        const obj1 = this.scene.player.boundingRect;
+    checkInteraction(obj){
+        // Check if its an event collider
+        if(obj.event){
+            this.scene.eventController.triggerEvent(obj.event);
+
+        }
+        
+        
+    }
+
+    detectCollision(objectGroup, obj1){
+       
         let faces= {};
+        let collidingObjects = [];
         for (let key in objectGroup){
             if (objectGroup.hasOwnProperty(key)) {
                 const obj2 = objectGroup[key].boundingRect;
@@ -29,18 +40,17 @@ export default class CharacterController{
                 if (obj1.bottom < obj2.top) { continue; }
                 // Check if obj1 is below obj2wd
                 if (obj1.top > obj2.bottom) { continue; }
-
+                if(obj1 === obj2) { continue; }
                 // If none of the above conditions are met, the objects are colliding
                 
-                // Check if its an event collider
-                if(objectGroup[key].event){
-                    this.scene.eventController.triggerEvent(objectGroup[key].event);
-              
-                    if(objectGroup[key].traversable){
-                        continue;
-                    }
+                // Do we need to do anything special with collision?
+                this.checkInteraction(objectGroup[key]);
+                // Dont need to block
+                if(objectGroup[key].traversable){
+                    continue;
                 }
-
+                
+                collidingObjects.push(objectGroup[key])
                  // Determine the face of collision
                 const overlapLeft = Math.ceil(obj2.right - obj1.left);
                 const overlapRight = Math.ceil(obj1.right - obj2.left);
@@ -64,7 +74,7 @@ export default class CharacterController{
                 }
             }
         }
-        return faces;
+        return {faces, collidingObjects};
     }
 
     // Moves charcter
@@ -124,43 +134,75 @@ export default class CharacterController{
                 y: this.scene.map.localPosition.y - mapY
             }
             
-            const result1 = this.detectCollision(this.scene.staticBoundries);
-            const result2 = this.detectCollision(this.scene.sceneObjects);
+            const result1 = this.detectCollision(this.scene.staticBoundries, this.scene.player.boundingRect);
+            const result2 = this.detectCollision(this.scene.sceneObjects, this.scene.player.boundingRect);
             // Combine collision results
-            const collision = Object.assign({}, result1, result2);
+            const collision = Object.assign({}, result1.faces, result2.faces);
+            const collidingObjects = [...result1.collidingObjects, ...result2.collidingObjects];
 
-            if(collision){
-                // Move player back because of collision
-                let positionX = 0;
-                let postitionY = 0;
-                let mapPositionX = 0;
-                let mapPositionY = 0;
-                if(collision["right"] && input["right"]){
-                    positionX = x;
-                    mapPositionX = mapX;
-                }
-                if(collision["left"] && input["left"]){
-                    positionX = x;
-                    mapPositionX = mapX;
-                }
+           
+            if(collidingObjects.length > 0){
+                const moveableObj = collidingObjects[0];
+                let resetPositions = true;
+                if(collidingObjects[0].moveable){
+                    resetPositions = false;
+                    
+                    moveableObj.position = {
+                        x: moveableObj.localPosition.x + x,
+                        y: moveableObj.localPosition.y + y
+                    }
+                    const result3 = this.detectCollision(this.scene.staticBoundries, moveableObj.boundingRect);
+                    const result4 = this.detectCollision(this.scene.sceneObjects, moveableObj.boundingRect);
+                    // Combine collision results
+                    const collisionMoveableObject = Object.assign({}, result3.faces, result4.faces);
+                    const collidingMoveableObjects = [...result4.collidingObjects, ...result3.collidingObjects];
+                    // Check if there was a collision
+                    if(collidingMoveableObjects.length>0){
+                        resetPositions = true;
+                        moveableObj.position = {
+                            x: moveableObj.localPosition.x - x,
+                            y: moveableObj.localPosition.y - y
+                        }
 
-                if(collision["top"] && input["up"]){ 
-                    postitionY = y;
-                    mapPositionY = mapY;
+                    }
+                    
+
                 }
-                if(collision["bottom"] && input["down"]){ 
-                    postitionY = y;
-                    mapPositionY = mapY;
-                }
-                // Reset player position
-                this.scene.player.position = {
-                    x: this.scene.player.localPosition.x - positionX,
-                    y: this.scene.player.localPosition.y - postitionY
-                }    
-                // Reset map position
-                this.scene.map.position = {
-                    x: this.scene.map.localPosition.x + mapPositionX,
-                    y: this.scene.map.localPosition.y + mapPositionY
+                if(resetPositions){
+                    // Move player back because of collision
+                    let positionX = 0;
+                    let postitionY = 0;
+                    let mapPositionX = 0;
+                    let mapPositionY = 0;
+                    if(collision["right"] && input["right"]){
+                        positionX = x;
+                        mapPositionX = mapX;
+                    }
+                    if(collision["left"] && input["left"]){
+                        positionX = x;
+                        mapPositionX = mapX;
+                    }
+
+                    if(collision["top"] && input["up"]){ 
+                        postitionY = y;
+                        mapPositionY = mapY;
+                    }
+                    if(collision["bottom"] && input["down"]){ 
+                        postitionY = y;
+                        mapPositionY = mapY;
+                    }
+                    // Reset player position
+                    this.scene.player.position = {
+                        x: this.scene.player.localPosition.x - positionX,
+                        y: this.scene.player.localPosition.y - postitionY
+                    }    
+                    // Reset map position
+                    this.scene.map.position = {
+                        x: this.scene.map.localPosition.x + mapPositionX,
+                        y: this.scene.map.localPosition.y + mapPositionY
+                    }
+
+                   
                 }
                 
                 

@@ -1,69 +1,73 @@
 
 import Sprite from "../../objects/sprite.js";
 import InputController from "../../controllers/inputController.js";
-import { displaySize } from "../../config.js"
+import MapController from "../../controllers/mapController.js";
+import { displaySize, displayOffset } from "../../config.js"
+
+const mapBoundryUrl = "largeMap";
+let fileName = "";
+
+let cellSize = 8;
+let squareOffsetX = 0;
+let squareOffsetY = 0;
+let showGroupings = true;
 
 
-const gridSize = 100;
-const cellSize = 8;
 
-const squareOffsetX = 0;
-const squareOffsetY = 0;
-const gridOffsetX = 0;
-const gridOffsetY = 0;
+if(!fileName || fileName.length === 0){
+    fileName = mapBoundryUrl;
+}
 
 const mainCanvas = document.getElementById('mainCanvas');
 const ctx = mainCanvas.getContext('2d');
-
-const squares = {};
+let squares = {};
 let optimizedSquares = {};
 
 const map = new Sprite({
     position: {x:0, y: 0},
-    image: "/src/img/largeMap.png"
+    image: "/src/img/maps/largeMap.png"
 })
 
-const controller = new InputController({remote: input});
+try{
 
-function drawGrid(){
-    
-        map.draw()
-      // Define cell size and grid dimensions
-    
-      // Calculate origin position
-      var originX = Math.floor(mainCanvas.width / 2);
-      var originY = Math.floor(mainCanvas.height / 2);
-    
-    
-      // Draw grid lines
-      ctx.beginPath();
-      ctx.lineWidth = 1;
-      ctx.globalAlpha = 0.4;
-
-      for (var i = -gridSize / 2; i <= gridSize / 2; i++) {
-          var x = originX + i * cellSize;
-          ctx.moveTo(x+gridOffsetX, 0);
-          ctx.lineTo(x+gridOffsetX, mainCanvas.height);
-      }
-      for (var j = -gridSize / 2; j <= gridSize / 2; j++) {
-          var y = originY + j * cellSize;
-          ctx.moveTo(0, y+gridOffsetY);
-          ctx.lineTo(mainCanvas.width, y+gridOffsetY);
-      }
-      ctx.strokeStyle = 'black';
-      ctx.stroke();
-      ctx.closePath();
-    
-      // Draw origin point
-      ctx.fillStyle = 'red';
-      ctx.fillRect(originX - 1, originY - 1, 1, 1);
-
-      
-      ctx.globalAlpha = 1;
-        
-    
+    import(`../../boundryLayers/${mapBoundryUrl}.js`).then(module => {
+        optimizedSquares = module.mapBoundry;
+        squares = module.mapBoundry
+    });
+}catch(error){
+    console.log("no map to load")
 }
-drawGrid();
+
+function saveBoundryLayer(){
+    fetch('http://localhost:3000/saveMapBoundry', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ optimizedSquares, fileName })
+    })
+    .then(response => response.text())
+    .then(message => console.log(message))
+    .catch(error => console.error('Error saving file:', error));
+}
+
+
+
+
+
+const inputController = new InputController();
+inputController.changeRemote(input)
+const mapController = new MapController({map, inputController})
+
+
+function drawMap(){
+    if(!map.imageLoaded){
+        setTimeout(()=>drawMap(), 10)
+        return;
+    }
+    drawSquares();
+}
+drawMap()
 
 
 function coordKey(x,y){
@@ -72,13 +76,13 @@ function coordKey(x,y){
 
 
 function handleClick(input){
-    if(input.canvasCoords){
+    if(input.localCoords){
 
-        let x = input.canvasCoords.x - (cellSize/2);
-        let y = input.canvasCoords.y - (cellSize/2);
+        let x = input.localCoords.x - (cellSize/2) - map.localPosition.x;
+        let y = input.localCoords.y - (cellSize/2) - map.localPosition.y;
 
-        x =  squareOffsetX + Math.round(x/8) * 8;
-        y =  squareOffsetY + Math.round(y/8) * 8;
+        x =  squareOffsetX + Math.round(x/cellSize) * cellSize;
+        y =  squareOffsetY + Math.round(y/cellSize) * cellSize;
 
         if(squares[coordKey(x, y)]){
             delete squares[coordKey(x, y)];
@@ -103,13 +107,6 @@ function drawSquares(){
     ctx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
     map.draw();
 
-    for (let key in squares){
-        if (squares.hasOwnProperty(key)) {
-            var value = squares[key];
-            ctx.fillStyle = 'blue'; // Change the fill color here
-            ctx.fillRect(value.x , value.y , cellSize, cellSize);
-        }
-    }
 
     for (let key in optimizedSquares){
         if (optimizedSquares.hasOwnProperty(key)) {
@@ -117,30 +114,67 @@ function drawSquares(){
             const width = value.right-value.x;
             const height = value.bottom-value.y;
 
-            const red = Math.random()*255;
-            const green = Math.random()*255;
-            const blue = Math.random()*255;
-
-            ctx.fillStyle = `rgb(${red}, ${green}, ${blue})`; // Change the fill color here
-            ctx.fillRect(value.x , value.y , width, height);
+            if(showGroupings){
+                const red = 100+ Math.random()*155;
+                ctx.fillStyle = `rgb(${red}, 0, 0)`; // Change the fill color here
+            }
+            else{
+                ctx.fillStyle = "red";
+            }
+            ctx.fillRect(value.x+displayOffset.x + map.localPosition.x , value.y+displayOffset.y + map.localPosition.y , width, height);
         }
     }
 }
 
 
 function input(input){
+    mapController.moveMap(input)
     handleClick(input);
     if(input.code === "KeyG"){
-        drawGrid();
+        saveBoundryLayer()
     }
+
     if(input.code === "KeyH"){
         ctx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
         map.draw();
     }
+
     if(input.code === "KeyP"){
         console.log(squares)
         console.log(optimizedSquares)
     }
+
+    if(input.code === "KeyC"){
+        if(showGroupings){
+            showGroupings = false;
+        }
+        else{
+            showGroupings = true;
+        }
+    }
+
+    if(input.code === "NumpadAdd"){
+        cellSize *= 2;
+    }
+    
+    if(input.code === "NumpadSubtract"){
+        cellSize /= 2;
+    }
+    if(input.code === "Numpad8"){
+        squareOffsetY--;
+    }
+    if(input.code === "Numpad2"){
+        squareOffsetY++;
+    }
+    if(input.code === "Numpad4"){
+        squareOffsetX--;
+    }
+    if(input.code === "Numpad6"){
+        squareOffsetX++;
+    }
+
+    
+    drawSquares();
 }
 
 

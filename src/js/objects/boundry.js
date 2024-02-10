@@ -6,16 +6,11 @@ export default class Boundry extends GameObject{
         this.origin = this.parent.origin;
         const width = config.boundry.right - config.boundry.left;
         const height = config.boundry.bottom - config.boundry.top;
-        const globalX = config.boundry.left + (width/2);
-        const globalY = config.boundry.top + (height/2);
-        const x = globalX - this.origin.x;
-        const y = globalY - this.origin.y;
+        const x = config.boundry.left + (width/2);
+        const y = config.boundry.top + (height/2);
         
         this.size = {width, height};
         this.position = {x, y};
-        this.traversable = config.traversable;
-
-        this.event = config.event || undefined; // Used for calling events
         
     }
 

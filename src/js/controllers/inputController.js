@@ -3,6 +3,7 @@ import { displaySize } from "../config.js";
 export default class InputController {
     constructor(config){
         this.remote = undefined;
+        this.dialogRemote = undefined;
         this.canvasCoords = {x:0,y:0};
         this.localCoords = {x:0,y:0};
         this.pressedKeys = {};
@@ -27,13 +28,18 @@ export default class InputController {
     changeRemote(remote) {
         this.remote = remote;
     }
+    // set dialog remote
+    setDialogRemote(remote) {
+        this.dialogRemote = remote;
+    }
 
     // Fires when input is detected
     input(input) {
         // Input not recongnized or no remote
         if(!input || !this.remote){ return; }
-        // Fire remote callback
+        // Fire remote callbacks
         this.remote(input);
+        this.dialogRemote(input);
     }
 
     // Initialize event listeners

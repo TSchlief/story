@@ -15,30 +15,14 @@ export default class GameObject {
         this.size = config.size || 0;
         this.children = [];
         this.parent?.addChild(this);
+        this.traversable = config.traversable || false;
+        this.moveable = config.moveable || false;
+        this.action = config.action || undefined;
+        this.event = config.event || undefined; // Used for calling events
 
     }
 
     
-   /* 
-    // Sets the objects position relative to its origin
-    set position(position){
-        this._localPosition = position;
-        this._position = {
-            x: this.origin.x + position.x,
-            y: this.origin.y + position.y
-        };
-
-        // Re-caclulate the bounding rect
-        calculateBoundingRect();
-
-        // Update the childrens origins and positions
-        for(let i = 0; i < this.children.length; i++) {
-            const child = this.children[i];
-            child.origin = this._position;
-            child.position = child._localPosition;
-        }
-    }
-    */
     // Returns position relative to center of the canvas
     get position(){
         return this._position;
@@ -100,6 +84,12 @@ export default class GameObject {
             if(this.children[i] === child){
                 this.children.splice(i,1);
             }
+        }
+    }
+
+    draw(){
+        if(!this.image){
+            return;
         }
     }
 
