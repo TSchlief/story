@@ -6,6 +6,7 @@ export default class InputController {
         this.dialogRemote = undefined;
         this.canvasCoords = {x:0,y:0};
         this.localCoords = {x:0,y:0};
+        this.currentDirection = "down";
         this.pressedKeys = {};
         this.keyMap = {
             'ArrowUp': 'up',
@@ -46,6 +47,8 @@ export default class InputController {
     init() {
         document.addEventListener("keydown", e=> {
             this.pressedKeys[this.keyMap[e.code]] = true;
+            this.determineCurrentDirection();
+
             let code = this.keyMap[e.code];
             if(!code){
                 code = e.code;
@@ -59,7 +62,6 @@ export default class InputController {
 
         document.addEventListener("mousedown", e=> {
             this.pressedKeys[this.keyMap[e.button]] = true;
-            
             const rect = mainCanvas.getBoundingClientRect();
             const mouseX = e.clientX  - rect.left;
             const mouseY = e.clientY - rect.top;
@@ -85,8 +87,37 @@ export default class InputController {
         });
 
         document.addEventListener("contextmenu", function(event) {
-        // Prevent the default right-click menu
-        event.preventDefault();
-    });
+            // Prevent the default right-click menu
+            event.preventDefault();
+        });
     }
+
+    determineCurrentDirection(){
+        const p = this.pressedKeys;        
+        if(p['up']) {
+            this.currentDirection = "up";
+        }
+        if(p['down']) {
+            this.currentDirection = "down";
+        }
+        if(p['left']) {
+            this.currentDirection = "left";
+        }
+        if(p['right']) {
+            this.currentDirection = "right";
+        }
+        if(p['up'] && p['left']) {
+            this.currentDirection = "upLeft";
+        }
+        if(p['up'] && p['right']) {
+            this.currentDirection = "upRight";
+        }
+        if(p['down'] && p['left']) {
+            this.currentDirection = "downLeft";
+        }
+        if(p['down'] && p['right']) {
+            this.currentDirection = "downRight";
+        }
+    }
+    
 }

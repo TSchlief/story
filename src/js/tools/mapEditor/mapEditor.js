@@ -25,7 +25,7 @@ let optimizedSquares = {};
 
 const map = new Sprite({
     position: {x:0, y: 0},
-    image: "/src/img/maps/largeMap.png"
+    image: "/src/img/maps/acreage.png"
 })
 
 try{

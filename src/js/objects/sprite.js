@@ -24,10 +24,8 @@ export default class Sprite extends GameObject {
             this.size.width = this.image.width;
             this.size.height = this.image.height;
         
-            this.boundingRect.top = this._position.y - (this.size.height/2),
-            this.boundingRect.left = this._position.x - (this.size.width/2),
-            this.boundingRect.bottom = this._position.y + (this.size.height/2),
-            this.boundingRect.right = this._position.x + (this.size.width/2)
+            
+            this.calculateBoundingRect();
             this.imageLoaded = true;
         }
     }
@@ -47,8 +45,8 @@ export default class Sprite extends GameObject {
                 0,
                 width,
                 height,
-                Math.round(this._position.x) - (width/2),
-                Math.round(this._position.y) - (height/2),
+                Math.round((this._position.x) - (width/2)),
+                Math.round((this._position.y) - (height/2)),
                 width,
                 height
             );

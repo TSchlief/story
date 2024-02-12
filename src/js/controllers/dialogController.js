@@ -20,6 +20,8 @@ export default class DialogController {
         this.renderFlag = false;
         this.skipFlag = false;
         this.option = 0;
+
+        this.debugMode= true;
     }
 
     getDialog(code) {
@@ -30,6 +32,24 @@ export default class DialogController {
         this.isEnabled = true;
         let result = {};
         const request = this.getDialog(code);
+        // Add destination to result
+        if(request.dest){
+            result.dest = request.dest;
+        }
+        // Check if forwarding is defined
+        if(request.forwarding){
+            // Check if forwarding is active
+            if(request.forwarding[0] !== 0){
+                // Foward to next dialog
+                // The first item in forwarding is the index to choose
+                return {dialog: request.forwarding[request.forwarding[0]]};
+            }
+        }
+        // Check if the dialog changes state
+        if(request.state){
+            // Change dialog state
+            this.changeState(request.state);
+        }
         if (request.text) {
             this.openDialog();
             console.log("text", request.text)
@@ -117,7 +137,7 @@ export default class DialogController {
             }
             
             index++;
-            if(this.skipFlag){                
+            if(this.skipFlag || this.debugMode){                
                 const resultString = text.replace(/\*/g, "</br>");
                 this.dialogText.innerHTML = resultString;
                 this.renderFlag = true;
@@ -141,6 +161,9 @@ export default class DialogController {
         this.typeWriter(text,0)
         
         
+    }
+    changeState(state){
+        this.dialog.changeState(state);
     }
 
     input(input){

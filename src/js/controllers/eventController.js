@@ -7,7 +7,7 @@ export default class EventController {
         this.inputController = new InputController();
         this.dialogController = new DialogController({inputController: this.inputController});
         this.scene = undefined;
-        this.loadScene("startScene");
+        this.loadScene("startSceneBedroom");
     }
 
     async triggerEvent(event) {
@@ -47,7 +47,9 @@ export default class EventController {
             });
             // Update dialog controeller with new scene
             this.dialogController.currentScene = this.scene;
+            this.scene.start();
         });
+
     }
 
 

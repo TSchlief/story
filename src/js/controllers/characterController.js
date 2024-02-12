@@ -81,6 +81,7 @@ export default class CharacterController{
     playerMovement(dt){
         // Get current pressed keys
         const input = this.scene.inputController.pressedKeys;
+        const currentDirection = this.scene.inputController.currentDirection;
         let x = 0;
         let y = 0;
         if(input['up']) { y -= 1; }
@@ -144,29 +145,36 @@ export default class CharacterController{
             if(collidingObjects.length > 0){
                 const moveableObj = collidingObjects[0];
                 let resetPositions = true;
-                if(collidingObjects[0].moveable){
-                    resetPositions = false;
-                    
-                    moveableObj.position = {
-                        x: moveableObj.localPosition.x + x,
-                        y: moveableObj.localPosition.y + y
-                    }
-                    const result3 = this.detectCollision(this.scene.staticBoundries, moveableObj.boundingRect);
-                    const result4 = this.detectCollision(this.scene.sceneObjects, moveableObj.boundingRect);
-                    // Combine collision results
-                    const collisionMoveableObject = Object.assign({}, result3.faces, result4.faces);
-                    const collidingMoveableObjects = [...result4.collidingObjects, ...result3.collidingObjects];
-                    // Check if there was a collision
-                    if(collidingMoveableObjects.length>0){
-                        resetPositions = true;
+                // Check if we can move object
+                const moveable = collidingObjects[0].moveable;
+                if(moveable){
+                    console.log(currentDirection)
+                    if( moveable === true || moveable === currentDirection ||
+                        (moveable === "horizontal" && (currentDirection === "left" || currentDirection === "right"))||
+                        (moveable === "vertical" && (currentDirection === "up" || currentDirection === "down"))
+                        
+                        ){
+                        resetPositions = false;
+                        
                         moveableObj.position = {
-                            x: moveableObj.localPosition.x - x,
-                            y: moveableObj.localPosition.y - y
+                            x: moveableObj.localPosition.x + x,
+                            y: moveableObj.localPosition.y + y
                         }
-
+                        const result3 = this.detectCollision(this.scene.staticBoundries, moveableObj.boundingRect);
+                        const result4 = this.detectCollision(this.scene.sceneObjects, moveableObj.boundingRect);
+                        // Combine collision results
+                        const collisionMoveableObject = Object.assign({}, result3.faces, result4.faces);
+                        const collidingMoveableObjects = [...result4.collidingObjects, ...result3.collidingObjects];
+                        // Check if there was a collision
+                        if(collidingMoveableObjects.length>0){
+                            resetPositions = true;
+                            moveableObj.position = {
+                                x: moveableObj.localPosition.x - x,
+                                y: moveableObj.localPosition.y - y
+                            }
+    
+                        }
                     }
-                    
-
                 }
                 if(resetPositions){
                     // Move player back because of collision
