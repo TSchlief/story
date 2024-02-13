@@ -34,11 +34,17 @@ export default class EventController {
             }
             console.log("dialog Results",result)
         }
-        else if(event.lighting) {
-            this.lightingController.toggleLight(event.lighting);
+        else if(event.lightOn) {
+            this.lightingController.onLight(event.lightOn);
+        }
+        else if(event.lightOff) {
+            this.lightingController.offLight(event.lightOff);
+        }
+        else if(event.lightToggle) {
+            this.lightingController.toggleLight(event.lightToggle);
         }
         else{
-            console.error("unhandled event!")
+            console.error("unhandled event!", event.lightOn)
         }
         
     }
@@ -60,7 +66,8 @@ export default class EventController {
             // Create a new scene
             this.scene = new SceneClass({
                 eventController: this,
-                inputController: this.inputController
+                inputController: this.inputController,
+                lightingController: this.lightingController,
             });
             // Update dialog controeller with new scene
             this.dialogController.currentScene = this.scene;

@@ -11,6 +11,7 @@ export default class Scene{
         this.ctx = mainCanvas.getContext('2d');
         this.inputController = config.inputController;
         this.eventController = config.eventController;
+        this.lightingController = config.lightingController;
         this.inputController.changeRemote(this.input.bind(this));
         this.characterController = new CharacterController({scene: this});
         this.boundryLayer = {};
@@ -42,8 +43,8 @@ export default class Scene{
     }
 
     // Methods to be overriden
-    contructSceneObjects() {throw new Error("You must override this method! Method: constructSceneObjects");}
-    contructLightObjects() {throw new Error("You must override this method! Method: contructLightObjects");}
+    constructSceneObjects() {throw new Error("You must override this method! Method: constructSceneObjects");}
+    constructLightObjects() {throw new Error("You must override this method! Method: contructLightObjects");}
     loadBoundryLayer() {throw new Error("You must override this method! Method: loadBoundryLayer");}
     start() {}
 
@@ -203,7 +204,8 @@ export default class Scene{
 
     // Initialization 
     init(){
-        this.contructSceneObjects();
+        this.constructSceneObjects();
+        this.constructLightObjects();
         this.loadBoundryLayer();
         this.createStaticBoundries();
         this.centeringMap();

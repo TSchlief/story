@@ -1,5 +1,8 @@
+import Lights from "../lights/lights.js";
+
 export default class LightingController{
     constructor(config){
+            this.lights = new Lights();
             this.curtain = document.getElementById("curtain");
             this.lightingCanvas = document.getElementById('lightingCanvas');
             this.ctx = lightingCanvas.getContext('2d');
@@ -12,22 +15,34 @@ export default class LightingController{
     }
     
 
-    toggleLight(light){
-        
-        this.ctx.clearRect(0, 0, this.lightingCanvas.width, this.lightingCanvas.height); 
-        this.drawLight();
+    onLight(lightId){
+        this.lights.onLight(lightId)
     }
 
+    offLight(lightId){
+        this.lights.offLight(lightId)
+    }
+
+    toggleLight(lightId){
+        this.lights.toggleLight(lightId)
+    }
+
+    getLight(lightId){
+        return this.lights.getLight(lightId);
+    }
+
+
     drawLight(){
-
-
         // Draw a rectangle
         this.ctx.fillStyle = 'rgba(200,200,200,0.1)'; // Fill color
         this.ctx.fillRect(0, 0, this.lightingCanvas.width, this.lightingCanvas.height); 
         this.drawMask();
     }
 
-    drawMask(){
+ 
+
+    // Not sure if this is needed. maybe if it is look into fillrect masking?
+    drawMask(){ 
         // Get Map Dimensions
         const boundingRect = this.currentScene.map.boundingRect;
         // Draw mask
@@ -53,7 +68,6 @@ export default class LightingController{
                 // Decrease opacity
                 if(opacity<0.20){
                     curtain.style.opacity = opacity - 0.05;
-                    console.log("speedup")
 
                 }
                 else{
@@ -71,7 +85,6 @@ export default class LightingController{
         return new Promise(resolve => {
             const checkFlag = () => {
                 if (!this.curtainClosed) {
-                    console.log("done fadein")
                     resolve();
                 } else {
                     setTimeout(checkFlag, 100);
@@ -104,7 +117,6 @@ export default class LightingController{
         return new Promise(resolve => {
             const checkFlag = () => {
                 if (this.curtainClosed) {
-                    console.log("done fadeOut")
                     resolve();
                 } else {
                     setTimeout(checkFlag, 100);

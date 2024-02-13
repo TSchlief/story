@@ -42,7 +42,12 @@ export default class DialogController {
             if(request.forwarding[0] !== 0){
                 // Foward to next dialog
                 // The first item in forwarding is the index to choose
-                return {dialog: request.forwarding[request.forwarding[0]]};
+                console.log("forwarding")
+                const newCode = request.forwarding[request.forwarding[0]];
+                if(newCode === 0){
+                    this.currentScene.characterController.isEnabled = true;
+                }
+                return {dialog: newCode};
             }
         }
         // Check if the dialog changes state
@@ -52,7 +57,6 @@ export default class DialogController {
         }
         if (request.text) {
             this.openDialog();
-            console.log("text", request.text)
             
             for (let i = 0; i < request.text.length; i++) {
                 await this.populateText(request.text[i])
@@ -147,7 +151,6 @@ export default class DialogController {
             
         }
         else {
-            console.log("finished rendering")
             this.renderFlag = true;
             console.log(this)
         }
@@ -190,8 +193,5 @@ export default class DialogController {
             this.option = 1
         }
 
-        if(input.code === "right") {
-            console.log(this.nextFlag, this.renderFlag, this.skipFlag)
-        }
     }
 }

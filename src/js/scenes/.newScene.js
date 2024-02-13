@@ -12,7 +12,7 @@ export default class startScene extends Scene{
         // Run starting dialog or event here
     }
 
-    contructSceneObjects() {
+    constructSceneObjects() {
         this.map = new Sprite({
             image: "/src/img/maps/largeMap.png"
         })

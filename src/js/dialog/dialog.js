@@ -17,10 +17,12 @@ code: {
 export default class Dialog{
     constructor(config) {
         this.dialog = {
-            0:{},// Empty dialog can be used for skipping depending on state
+            0: {},// Empty dialog can be used for skipping depending on state
 
             1: {
                 text: ["You feel rested! Time to start your day."] ,
+                forwarding: [0, 0],
+                state:[1, 1],
             },
 
             2: {

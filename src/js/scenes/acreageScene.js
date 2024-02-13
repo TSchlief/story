@@ -14,7 +14,7 @@ export default class startScene extends Scene{
         this.characterController.isEnabled = true;
     }
 
-    contructSceneObjects() {
+    constructSceneObjects() {
         this.map = new Sprite({
             image: "/src/img/maps/acreage.png"
         })
@@ -53,7 +53,7 @@ export default class startScene extends Scene{
              
 
         const sign = new Sprite({
-            event: {type: "dialog", code: 3},
+            event: {door: "startSceneBedroom"},
             parent: this.map,
             position: {x:30, y: 0},
             image: "/src/img/sign.png"
@@ -72,6 +72,14 @@ export default class startScene extends Scene{
         
         this.sceneObjects = [this.player,  houseRoof,door, sign, tree]
     }
+
+    constructLightObjects() {
+        // Define lightobjects here
+
+        // Add lightobjects to list
+        this.lightObjects =[];
+    }
+
     loadBoundryLayer() {
         this.boundryLayer = {
             "houseLeft": {

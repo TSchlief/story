@@ -2,7 +2,7 @@
 import Scene from './scene.js';
 import Sprite from "../objects/sprite.js";
 import Boundry from '../objects/boundry.js';
-import LightEmitter from '../objects/light.js';
+import Light from '../objects/light.js';
 
 export default class startScene extends Scene{
     constructor(config) {
@@ -13,10 +13,11 @@ export default class startScene extends Scene{
 
     start(){
         this.eventController.triggerEvent({dialog:1})
+        console.log(this.characterController.isEnabled)
     }
 
 
-    contructSceneObjects() {
+    constructSceneObjects() {
         this.map = new Sprite({
             image: "/src/img/maps/startSceneBedroom.png"
         })
@@ -39,7 +40,7 @@ export default class startScene extends Scene{
 
         const chair = new Sprite({
             position: {x:72, y: 45},
-            event:{lighting: 1},
+            event:{lightOn: 1},
             boundingRect: {top:-13, right:-10},
             parent: this.map,
             image: "/src/img/furniture/chairLeftPlain.png"
@@ -67,11 +68,16 @@ export default class startScene extends Scene{
     
     constructLightObjects() {
         // Define lightobjects here
-
+        const light1= new Light({
+            parent: this.map,
+            lightingController: this.lightingController,
+            position: {x: 0, y:40}
+            
+        })
         // Add lightobjects to list
-        this.lightObjects =[];
+        this.lightObjects =[light1];
     }
-    
+
     loadBoundryLayer() {
         this.boundryLayer = {
             "topWall": {
