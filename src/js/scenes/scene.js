@@ -11,11 +11,12 @@ export default class Scene{
         this.ctx = mainCanvas.getContext('2d');
         this.inputController = config.inputController;
         this.eventController = config.eventController;
-        this.inputController.changeRemote(this.input.bind(this))
+        this.inputController.changeRemote(this.input.bind(this));
         this.characterController = new CharacterController({scene: this});
         this.boundryLayer = {};
         this.staticBoundries = {};
         this.sceneObjects = [];
+        this.lightObjects = [];
         this.boundries = false;
         this.timeStamp = Date.now();
         this.playerSpeed = 0.07;
@@ -42,6 +43,7 @@ export default class Scene{
 
     // Methods to be overriden
     contructSceneObjects() {throw new Error("You must override this method! Method: constructSceneObjects");}
+    contructLightObjects() {throw new Error("You must override this method! Method: contructLightObjects");}
     loadBoundryLayer() {throw new Error("You must override this method! Method: loadBoundryLayer");}
     start() {}
 
@@ -53,6 +55,7 @@ export default class Scene{
         
         this.map.draw();
         this.drawSceneObjects();
+        this.drawLightObjects();
         if(this.boundries){
             this.drawBoundries(this.sceneObjects);
             this.drawBoundries(this.staticBoundries);
@@ -102,15 +105,20 @@ export default class Scene{
         }
     }
 
+    drawObjects(objList){
+        for (let obj in objList){
+            const currentObj = objList[obj];
+            currentObj.draw();
+        }
+    }
 
+    drawLightObjects(){
+        this.drawObjects(this.lightObjects);
+    }
 
     drawSceneObjects(){
         this.sceneObjects.sort((obj1, obj2) => obj1.zHeight - obj2.zHeight);
-
-        for (let obj in this.sceneObjects){
-            const currentObj = this.sceneObjects[obj];
-            currentObj.draw();
-        }
+        this.drawObjects(this.sceneObjects);
     }
 
     drawBoundries(objGroup){

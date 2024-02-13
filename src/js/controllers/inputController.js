@@ -58,6 +58,7 @@ export default class InputController {
 
         document.addEventListener("keyup", e=> {
             this.pressedKeys[this.keyMap[e.code]] = false;
+            this.determineCurrentDirection();
         });
 
         document.addEventListener("mousedown", e=> {

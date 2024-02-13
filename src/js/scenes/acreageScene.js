@@ -9,6 +9,11 @@ export default class startScene extends Scene{
     }
 
 
+    start(){
+        // Run starting dialog or event here
+        this.characterController.isEnabled = true;
+    }
+
     contructSceneObjects() {
         this.map = new Sprite({
             image: "/src/img/maps/acreage.png"

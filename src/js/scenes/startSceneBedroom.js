@@ -2,6 +2,7 @@
 import Scene from './scene.js';
 import Sprite from "../objects/sprite.js";
 import Boundry from '../objects/boundry.js';
+import LightEmitter from '../objects/light.js';
 
 export default class startScene extends Scene{
     constructor(config) {
@@ -11,7 +12,7 @@ export default class startScene extends Scene{
     }
 
     start(){
-        this.eventController.triggerEvent({type: "dialog", code: 1})
+        this.eventController.triggerEvent({dialog:1})
     }
 
 
@@ -38,7 +39,7 @@ export default class startScene extends Scene{
 
         const chair = new Sprite({
             position: {x:72, y: 45},
-            event:{type:"dialog", code: 3},
+            event:{lighting: 1},
             boundingRect: {top:-13, right:-10},
             parent: this.map,
             image: "/src/img/furniture/chairLeftPlain.png"
@@ -46,7 +47,7 @@ export default class startScene extends Scene{
         
         const door = new Boundry({   
             parent: this.map,
-            event: {type:"dialog", code:2} ,
+            event: {dialog: 2} ,
             color:"green",
             boundry: {
                 "left": -31,
@@ -55,12 +56,22 @@ export default class startScene extends Scene{
                 "bottom": -9
             }
         });
+        
+
  
 
         
     
         this.sceneObjects = [this.player, desk, chair, door]
     }
+    
+    constructLightObjects() {
+        // Define lightobjects here
+
+        // Add lightobjects to list
+        this.lightObjects =[];
+    }
+    
     loadBoundryLayer() {
         this.boundryLayer = {
             "topWall": {

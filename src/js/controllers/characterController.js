@@ -4,7 +4,7 @@ import { displayOffset, displaySize } from '../config.js';
 export default class CharacterController{
     constructor(config){
         this.scene = config.scene;
-        this.isEnabled = true;
+        this.isEnabled = false;
 
     }
 

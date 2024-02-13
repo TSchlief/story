@@ -36,6 +36,13 @@ export default class startScene extends Scene{
         
         this.sceneObjects = [this.player, newObject]
     }
+
+    constructLightObjects() {
+        // Define lightobjects here
+
+        // Add lightobjects to list
+        this.lightObjects =[];
+    }
     loadBoundryLayer() {
         this.boundryLayer = {
             "newBoundry": {

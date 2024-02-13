@@ -20,7 +20,6 @@ export default class Sprite extends GameObject {
         this.image.src = config.image;
         this.size = config.size || {width: 0, height: 0};
         this.image.onload = ()=>{
-            console.log('imageLoaded')
             this.size.width = this.image.width;
             this.size.height = this.image.height;
         
@@ -38,7 +37,6 @@ export default class Sprite extends GameObject {
         
 
         if(ctx){
-            ctx.globalAlpha = 1;
             ctx.drawImage(
                 this.image,
                 0,
@@ -51,7 +49,6 @@ export default class Sprite extends GameObject {
                 height
             );
             
-            ctx.globalAlpha = 1;
         }
         
     }

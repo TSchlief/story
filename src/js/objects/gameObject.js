@@ -7,7 +7,7 @@ export default class GameObject {
  
         this._localPosition = config.position || {x:0, y:0};
         this._position = {
-            x: this.origin.x + (config.position?.x || 0) ,
+            x: this.origin.x + (config.position?.x || 0),
             y: this.origin.y + (config.position?.y || 0) 
         };
         this.boundingRect = {}
