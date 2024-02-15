@@ -1,8 +1,9 @@
-import Lights from "../lights/lights.js";
+import Lights from "../libraries/lights.js";
 
 export default class LightingController{
     constructor(config){
             this.lights = new Lights();
+            this.audioController = config.audioController;
             this.curtain = document.getElementById("curtain");
             this.lightingCanvas = document.getElementById('lightingCanvas');
             this.ctx = lightingCanvas.getContext('2d');
@@ -17,14 +18,22 @@ export default class LightingController{
 
     onLight(lightId){
         this.lights.onLight(lightId)
+        this.audioController.playSoundEffect("lightOn");
+        console.log(this.audioController)
     }
 
     offLight(lightId){
         this.lights.offLight(lightId)
+        this.audioController.playSoundEffect("lightOff");
     }
 
     toggleLight(lightId){
-        this.lights.toggleLight(lightId)
+        const on = this.lights.toggleLight(lightId)
+        if(on){
+            this.audioController.playSoundEffect("lightOn");
+        }else{
+            this.audioController.playSoundEffect("lightOff");
+        }
     }
 
     getLight(lightId){

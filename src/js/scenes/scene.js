@@ -30,16 +30,19 @@ export default class Scene{
 
 
     sceneAction(input){
-        const collision = this.detectCollision(this.sceneObjects, this.player.boundingRect);
-        
-        // Are we colliding with an object?
-        if(collision.collidingObjects.length > 0){
-            const interactingObject = collision.collidingObjects[0];
-            if(interactingObject.dialog){
-                console.log(this.dialog.getDialog(interactingObject.dialog))
-            }
-        }
+        if(this.characterController.isEnabled){
 
+            const result = this.rayCast(10, this.player, this.inputController.currentDirection, [this.sceneObjects]);
+            console.log("raycast",result)
+            if(result?.action){
+                setTimeout(() => {
+                    this.eventController.triggerEvent(result.action);
+                    
+                }, 50);
+            }
+            
+            
+        }
     }
 
     // Methods to be overriden
@@ -230,9 +233,75 @@ export default class Scene{
         this.characterController = undefined;
     }
 
+    directionToVector(direction){
+        if(direction === "up") {
+            return {x: 0, y:-1};
+        }
+        else if(direction === "down") {
+            return {x: 0, y:1};
+        }
+        else if(direction === "left") {
+            return {x: -1, y:0};
+        }
+        else if(direction === "right") {
+            return {x: 1, y:0};
+        }
+        else if(direction === "upLeft") {
+            return {x: -1, y:-1};
+        }
+        else if(direction === "upRight") {
+            return {x: 1, y:-1};
+        }
+        else if(direction === "downLeft") {
+            return {x: -1, y:1};
+        }
+        else{
+            return {x: 1, y:1};
+        }
+    }
+
+    // Cast a ray and return fist obj hit
+    rayCast(distance, origin, direction, objGroups){
+
+        // Init ray origin
+        // We should set the origin to the center of the bounding rect instead ********************
+        let ray = {x:origin.position.x, y:origin.position.y};
+        // Get ray vector
+        const rayDirection = this.directionToVector(direction);
+        // Cycle through each ray location
+        for(let i = 0; i<distance; i++) {
+            // Cycle through different object collections
+            for(let key in objGroups){
+                const objGroup = objGroups[key]
+                // Cycle through object collection
+                for (let key in objGroup){
+                    if (objGroup.hasOwnProperty(key)) {
+                        // Object to test
+                        const obj = objGroup[key];
+                        // If obj is ray origin object then we are not colliding
+                        if(obj === origin) { continue; }
+                        // Check if obj1 is to the left of obj2
+                        if (ray.x < obj.boundingRect.left) { continue; }
+                        // Check if obj1 is to the right of obj2
+                        if (ray.x > obj.boundingRect.right) { continue; }
+                        // Check if obj1 is above obj2
+                        if (ray.y < obj.boundingRect.top) { continue; }
+                        // Check if obj1 is below obj2wd
+                        if (ray.y > obj.boundingRect.bottom) { continue; }
+                        // If none of the above conditions are met, the objects are colliding
+                        
+                        return obj;
+                    }
+                }
+            }
+            // Move ray along its vector
+            ray.x += rayDirection.x;
+            ray.y += rayDirection.y;
+        }
+    }
+
     // Takes a an object group and another objs boundingRect and checks for collisions
     detectCollision(objectGroup, obj1){
-       
         let faces= {};
         let collidingObjects = [];
         for (let key in objectGroup){

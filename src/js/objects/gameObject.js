@@ -32,8 +32,9 @@ export default class GameObject {
         this.color = config.color || "red";// Used to draw boundries and squashing bugs
         this.traversable = config.traversable || false;
         this.moveable = config.moveable || false;
-        this.action = config.action || undefined;
-        this.event = config.event || undefined; // Used for calling events
+        this.action = config.action || undefined; // Used for calling user activated event
+        this.moveEvent = config.moveEvent || undefined; // Used for calling events when moving objects
+        this.event = config.event || undefined; // Used for calling events on collision
 
         this.calculateBoundingRect();
     }

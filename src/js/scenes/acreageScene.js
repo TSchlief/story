@@ -22,7 +22,7 @@ export default class startScene extends Scene{
 
         this.player = new Sprite({
             position: {x:0, y: 0},
-            boundingRect: {top:-20, left:-10, right:-10},
+            boundingRect: {top:-20, },
             parent: this.map,
             image: "/src/img/player.png"
         })

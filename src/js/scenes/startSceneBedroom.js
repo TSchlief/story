@@ -33,6 +33,7 @@ export default class startScene extends Scene{
             position: {x:90, y: 45},
             boundingRect: {top:-13},
             zHeight:-10,
+            moveEvent:{longSound: "woodSliding"},
             moveable: "down",
             parent: this.map,
             image: "/src/img/furniture/deskVerticlePlain.png"
@@ -40,7 +41,6 @@ export default class startScene extends Scene{
 
         const chair = new Sprite({
             position: {x:72, y: 45},
-            event:{lightOn: 1},
             boundingRect: {top:-13, right:-10},
             parent: this.map,
             image: "/src/img/furniture/chairLeftPlain.png"
@@ -48,13 +48,26 @@ export default class startScene extends Scene{
         
         const door = new Boundry({   
             parent: this.map,
-            event: {dialog: 2} ,
+            action: {dialog: 2} ,
             color:"green",
+            traversable: true,
             boundry: {
                 "left": -31,
-                "top": -17,
+                "top": -50,
                 "right": -2,
-                "bottom": -9
+                "bottom": -25
+            }
+        });    
+        const lightSwitch = new Boundry({
+            parent: this.map,
+            traversable: true,
+            action:{lightToggle: 1},
+            color:"blue",
+            boundry: {
+                "left": -2,
+                "top": -50,
+                "right": 24,
+                "bottom": -25
             }
         });
         
@@ -63,7 +76,7 @@ export default class startScene extends Scene{
 
         
     
-        this.sceneObjects = [this.player, desk, chair, door]
+        this.sceneObjects = [this.player, desk, chair, door, lightSwitch]
     }
     
     constructLightObjects() {

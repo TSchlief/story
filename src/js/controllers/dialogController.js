@@ -1,10 +1,11 @@
-import Dialog from "../dialog/dialog.js";
+import Dialog from "../libraries/dialog.js";
 
 export default class DialogController {
     constructor(config) {
         this.dialog = new Dialog();
         this.inputController = config.inputController
         this.inputController.setDialogRemote(this.input.bind(this))
+        this.audioController = config.audioController;
         this.currentScene = undefined;
         this.dialogWrapper = document.getElementById('dialogWrapper');
         this.dialogContainer = document.getElementById('dialogContainer');
@@ -21,7 +22,7 @@ export default class DialogController {
         this.skipFlag = false;
         this.option = 0;
 
-        this.debugMode= true;
+        this.debugMode= false;
     }
 
     getDialog(code) {
@@ -139,7 +140,7 @@ export default class DialogController {
             else{
                 this.dialogText.innerHTML += char;
             }
-            
+            this.audioController.playSoundEffect('typeWriter')
             index++;
             if(this.skipFlag || this.debugMode){                
                 const resultString = text.replace(/\*/g, "</br>");
@@ -152,7 +153,6 @@ export default class DialogController {
         }
         else {
             this.renderFlag = true;
-            console.log(this)
         }
           
     }

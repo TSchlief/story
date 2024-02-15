@@ -15,15 +15,8 @@ export default class CharacterController{
         this.playerMovement(dt);
     }
 
-    checkInteraction(obj){
-        // Check if its an event collider
-        if(obj.event){
-            this.scene.eventController.triggerEvent(obj.event);
-
-        }
-        
-        
-    }
+ 
+    
 
     detectCollision(objectGroup, obj1){
        
@@ -44,7 +37,9 @@ export default class CharacterController{
                 // If none of the above conditions are met, the objects are colliding
                 
                 // Do we need to do anything special with collision?
-                this.checkInteraction(objectGroup[key]);
+                if(objectGroup[key].event){
+                    this.scene.eventController.triggerEvent(objectGroup[key].event);
+                }
                 // Dont need to block
                 if(objectGroup[key].traversable){
                     continue;
@@ -148,7 +143,6 @@ export default class CharacterController{
                 // Check if we can move object
                 const moveable = collidingObjects[0].moveable;
                 if(moveable){
-                    console.log(currentDirection)
                     if( moveable === true || moveable === currentDirection ||
                         (moveable === "horizontal" && (currentDirection === "left" || currentDirection === "right"))||
                         (moveable === "vertical" && (currentDirection === "up" || currentDirection === "down"))
@@ -163,7 +157,6 @@ export default class CharacterController{
                         const result3 = this.detectCollision(this.scene.staticBoundries, moveableObj.boundingRect);
                         const result4 = this.detectCollision(this.scene.sceneObjects, moveableObj.boundingRect);
                         // Combine collision results
-                        const collisionMoveableObject = Object.assign({}, result3.faces, result4.faces);
                         const collidingMoveableObjects = [...result4.collidingObjects, ...result3.collidingObjects];
                         // Check if there was a collision
                         if(collidingMoveableObjects.length>0){
@@ -173,6 +166,12 @@ export default class CharacterController{
                                 y: moveableObj.localPosition.y - y
                             }
     
+                        }
+                        else{
+                            //Moving object check for moving event
+                            if(moveableObj.moveEvent){
+                                this.scene.eventController.triggerEvent(moveableObj.moveEvent);
+                            }
                         }
                     }
                 }
