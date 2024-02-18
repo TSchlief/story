@@ -1,6 +1,6 @@
 import GameObject from "./gameObject.js";
 
-export default class Sprite extends GameObject {
+export default class Character extends GameObject {
     constructor(config) {
         super(config);
     
@@ -27,6 +27,11 @@ export default class Sprite extends GameObject {
             this.calculateBoundingRect();
             this.imageLoaded = true;
         }
+        this.inputController = config.inputController;
+        this.characterController = config.characterController;
+        this.horizontalCut = config.characterDirection || 0;
+
+        
     }
 
 
@@ -36,10 +41,27 @@ export default class Sprite extends GameObject {
         const height = this.size.height;
         
 
+        //if(this.characterController?.isEnabled){
+            const currentDirection = this.inputController.currentDirection;
+            if(currentDirection === "up") {
+                this.horizontalCut = width*3;
+            }
+            else if(currentDirection === "right") {
+                this.horizontalCut = width*2;
+            }
+            else if(currentDirection === "left") {
+                this.horizontalCut = width*1;
+            }
+            else{
+                this.horizontalCut = 0;
+            }
+        //}
+
+
         if(ctx){
             ctx.drawImage(
                 this.image,
-                0,
+                this.horizontalCut,
                 0,
                 width,
                 height,

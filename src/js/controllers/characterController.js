@@ -3,9 +3,9 @@ import { displayOffset, displaySize } from '../config.js';
 
 export default class CharacterController{
     constructor(config){
-        this.scene = config.scene;
-        this.isEnabled = false;
-
+        this.scene = config.scene; 
+        this.isEnabled = false; // Enable or disable player controls
+        this.currentTraversableObj = undefined; // Tracks current collision to prevent multiple triggers
     }
 
     update(dt){
@@ -15,13 +15,11 @@ export default class CharacterController{
         this.playerMovement(dt);
     }
 
- 
-    
-
-    detectCollision(objectGroup, obj1){
-       
+    // Returns collision data if ab object bounding react overlaps another object
+    detectCollision(objectGroup, obj1, triggerEvents){
         let faces= {};
         let collidingObjects = [];
+        let traversableObjects = [];
         for (let key in objectGroup){
             if (objectGroup.hasOwnProperty(key)) {
                 const obj2 = objectGroup[key].boundingRect;
@@ -36,16 +34,20 @@ export default class CharacterController{
                 if(obj1 === obj2) { continue; }
                 // If none of the above conditions are met, the objects are colliding
                 
+                
+
                 // Do we need to do anything special with collision?
-                if(objectGroup[key].event){
+                if(triggerEvents && objectGroup[key].event && !this.currentTraversableObj){
                     this.scene.eventController.triggerEvent(objectGroup[key].event);
+                    this.currentTraversableObj = objectGroup[key];
                 }
                 // Dont need to block
                 if(objectGroup[key].traversable){
-                    continue;
+                    traversableObjects.push(objectGroup[key]);
+                }else{
+                    collidingObjects.push(objectGroup[key]);
                 }
                 
-                collidingObjects.push(objectGroup[key])
                  // Determine the face of collision
                 const overlapLeft = Math.ceil(obj2.right - obj1.left);
                 const overlapRight = Math.ceil(obj1.right - obj2.left);
@@ -69,7 +71,7 @@ export default class CharacterController{
                 }
             }
         }
-        return {faces, collidingObjects};
+        return {faces, collidingObjects, traversableObjects};
     }
 
     // Moves charcter
@@ -88,6 +90,7 @@ export default class CharacterController{
 
         // If input is detected
         if(magnitude > 0){
+            // Normalize input
             x = x/magnitude;
             y = y/magnitude;
             x *= this.scene.playerSpeed * dt;
@@ -99,7 +102,7 @@ export default class CharacterController{
                 y: this.scene.player.localPosition.y + y
             }
 
-            // Move map
+            // Move map to track player
             let mapX = x;
             let mapY = y;
             if(input['up']) { 
@@ -107,38 +110,51 @@ export default class CharacterController{
                     mapY = 0;
                 }
             }
+
             if(input['down']) {
                 if(this.scene.map.boundingRect.bottom < displaySize.y+1 || this.scene.player.position.y < displayOffset.y){
                     mapY = 0;
                 }
-                
             }
+
             if(input['left']) {
                 if(this.scene.map.boundingRect.left > -1 || this.scene.player.position.x > displayOffset.x){
                     mapX = 0;
                 }
                 
             }
+
             if(input['right']) {
                 if(this.scene.map.boundingRect.right < displaySize.x+1 || this.scene.player.position.x < displayOffset.x){
                     mapX = 0;
                 }
             }
             
+            // Set the map position
             this.scene.map.position = {
                 x: this.scene.map.localPosition.x - mapX,
                 y: this.scene.map.localPosition.y - mapY
             }
             
-            const result1 = this.detectCollision(this.scene.staticBoundries, this.scene.player.boundingRect);
-            const result2 = this.detectCollision(this.scene.sceneObjects, this.scene.player.boundingRect);
+            // Check collisions of static boundries and scene objects
+            const result1 = this.detectCollision(this.scene.staticBoundries, this.scene.player.boundingRect, true);
+            const result2 = this.detectCollision(this.scene.sceneObjects, this.scene.player.boundingRect, true);
             // Combine collision results
             const collision = Object.assign({}, result1.faces, result2.faces);
             const collidingObjects = [...result1.collidingObjects, ...result2.collidingObjects];
+            const traversableObjects = [...result2.traversableObjects];
 
-           
+            // If not on a traversable object clear the collision flag
+            if(traversableObjects.length<1){
+                this.currentTraversableObj = undefined;
+            }
+            
+            // If we are colliding with non traversable objects
             if(collidingObjects.length > 0){
+                // Define the object we collided with 
                 const moveableObj = collidingObjects[0];
+
+                // If resetPositions stays true we need to reset positions of map, player, and movableObjects
                 let resetPositions = true;
                 // Check if we can move object
                 const moveable = collidingObjects[0].moveable;
@@ -146,9 +162,9 @@ export default class CharacterController{
                     if( moveable === true || moveable === currentDirection ||
                         (moveable === "horizontal" && (currentDirection === "left" || currentDirection === "right"))||
                         (moveable === "vertical" && (currentDirection === "up" || currentDirection === "down"))
-                        
                         ){
-                        resetPositions = false;
+                            // We are attempting to move an object
+                            resetPositions = false;
                         
                         moveableObj.position = {
                             x: moveableObj.localPosition.x + x,
@@ -160,12 +176,13 @@ export default class CharacterController{
                         const collidingMoveableObjects = [...result4.collidingObjects, ...result3.collidingObjects];
                         // Check if there was a collision
                         if(collidingMoveableObjects.length>0){
+                            // We have a collision so we need to reset player, map and moveable obj
                             resetPositions = true;
+                            // Reset movable objects position
                             moveableObj.position = {
                                 x: moveableObj.localPosition.x - x,
                                 y: moveableObj.localPosition.y - y
                             }
-    
                         }
                         else{
                             //Moving object check for moving event
@@ -175,12 +192,15 @@ export default class CharacterController{
                         }
                     }
                 }
+                
+                // We need to reset player and map positions
                 if(resetPositions){
                     // Move player back because of collision
                     let positionX = 0;
                     let postitionY = 0;
                     let mapPositionX = 0;
                     let mapPositionY = 0;
+                    // Determine how the objects need to be reset
                     if(collision["right"] && input["right"]){
                         positionX = x;
                         mapPositionX = mapX;
@@ -208,11 +228,7 @@ export default class CharacterController{
                         x: this.scene.map.localPosition.x + mapPositionX,
                         y: this.scene.map.localPosition.y + mapPositionY
                     }
-
-                   
                 }
-                
-                
             }
         }
     }

@@ -8,7 +8,9 @@ export default class Scene{
 
     constructor(config) {
         this.mainCanvas = document.getElementById('mainCanvas');
+        this.lightingCanvas = document.getElementById('lightingCanvas');
         this.ctx = mainCanvas.getContext('2d');
+        this.ctxL = lightingCanvas.getContext('2d');
         this.inputController = config.inputController;
         this.eventController = config.eventController;
         this.lightingController = config.lightingController;
@@ -22,6 +24,8 @@ export default class Scene{
         this.timeStamp = Date.now();
         this.playerSpeed = 0.07;
         this.centerMap = false;
+        this.playerStartingLocation = config.playerStartingLocation || {x:0, y:0};
+        this.darkness = 0;
         
         this.init();
         
@@ -33,7 +37,7 @@ export default class Scene{
         if(this.characterController.isEnabled){
 
             const result = this.rayCast(10, this.player, this.inputController.currentDirection, [this.sceneObjects]);
-            console.log("raycast",result)
+        
             if(result?.action){
                 setTimeout(() => {
                     this.eventController.triggerEvent(result.action);
@@ -54,12 +58,21 @@ export default class Scene{
     // Run anthing that requires updating
     update(dt){
         this.ctx.clearRect(0, 0, this.mainCanvas.width, this.mainCanvas.height);
+        this.ctxL.clearRect(0, 0, this.lightingCanvas.width, this.lightingCanvas.height);
         this.characterController.update(dt);
-
         
         this.map.draw();
         this.drawSceneObjects();
+
+        this.ctxL.fillStyle = `rgba(0,0,0,${this.darkness})`; 
+        this.ctxL.fillRect(0, 0, this.lightingCanvas.width, this.lightingCanvas.height); 
+
+        this.ctx.globalCompositeOperation = "source-atop";
+        this.ctxL.globalCompositeOperation = "destination-out";
         this.drawLightObjects();
+        
+        this.ctx.globalCompositeOperation = "source-over";
+        this.ctxL.globalCompositeOperation = "source-over";
         if(this.boundries){
             this.drawBoundries(this.sceneObjects);
             this.drawBoundries(this.staticBoundries);
@@ -77,35 +90,37 @@ export default class Scene{
                 this.boundries = true;
             }
         }
+                 
         
-        if(input.code === "KeyP"){ //debugging
-            console.log(this.player)
-        }           
-        if(input.code === "KeyC"){ //debugging
-            this.characterController.isEnabled = false;
-        }        
-        if(input.code === "KeyV"){ //debugging
-            this.characterController.isEnabled = true;
-        }
-        
-        if(input.code === "BracketRight"){ //debugging
-            window.open('/mapEditor', '_blank');
-        }
         if(input.code === "mainAction"){
-            const localClick = {
-                x: Math.round(input.localCoords.x- this.map.localPosition.x),
-                y: Math.round(input.localCoords.y- this.map.localPosition.y)
-            };
-            console.log(localClick)
-            this.sceneAction({code:input.code, localClick})
+            if(input.localCoords){
+                const localClick = {
+                    x: Math.round(input.localCoords.x- this.map.localPosition.x),
+                    y: Math.round(input.localCoords.y- this.map.localPosition.y)
+                };
+                console.log(localClick)
+            }
+            this.sceneAction({code:input.code})
         }
         if(input.code === "secondaryAction"){
-            const localClick = {
-                x: Math.round(input.localCoords.x- this.map.localPosition.x),
-                y: Math.round(input.localCoords.y- this.map.localPosition.y)
-            };
-            
-            this.sceneAction({code:input.code, localClick})
+            if(input.localCoords){
+
+                const localClick = {
+                    x: Math.round(input.localCoords.x- this.map.localPosition.x),
+                    y: Math.round(input.localCoords.y- this.map.localPosition.y)
+                };
+                
+                console.log(input.previousLocalCoords, "local coorsds")
+                const prevLocalClick = {
+                    x: Math.round(input.previousLocalCoords.x - this.map.localPosition.x),
+                    y: Math.round(input.previousLocalCoords.y - this.map.localPosition.y)
+                };
+                // Click top left then bottom right to
+                // log a boundry object for development
+                console.log({"left": prevLocalClick.x,"top": prevLocalClick.y,"right": localClick.x,"bottom": localClick.y});
+                
+            }
+            this.sceneAction({code:input.code})
         }
     }
 

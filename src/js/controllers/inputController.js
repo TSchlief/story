@@ -6,6 +6,8 @@ export default class InputController {
         this.dialogRemote = undefined;
         this.canvasCoords = {x:0,y:0};
         this.localCoords = {x:0,y:0};
+        this.previousCanvasCoords = {x:0,y:0};
+        this.previousLocalCoords = {x:0,y:0};
         this.currentDirection = "down";
         this.pressedKeys = {};
         this.keyMap = {
@@ -70,6 +72,11 @@ export default class InputController {
             const x = Math.round((mouseX * displaySize.x) / rect.width);
             const y = Math.round((mouseY * displaySize.y) / rect.height);
 
+            // Assign previous coords
+            this.previousCanvasCoords = {...this.canvasCoords}
+            this.previousLocalCoords = {...this.localCoords}
+            
+            // Assign current coords
             this.canvasCoords = {x, y};
             this.localCoords = {
                 x: Math.round(x - (displaySize.x/2)),
@@ -79,7 +86,9 @@ export default class InputController {
             this.input({
                 code: this.keyMap[e.button],
                 canvasCoords: {x, y},
-                localCoords: this.localCoords
+                localCoords: this.localCoords,
+                previousCanvasCoords: this.previousCanvasCoords,
+                previousLocalCoords: this.previousLocalCoords,
             });
         });
 
@@ -98,27 +107,16 @@ export default class InputController {
         if(p['up']) {
             this.currentDirection = "up";
         }
-        if(p['down']) {
+        else if(p['down']) {
             this.currentDirection = "down";
         }
-        if(p['left']) {
+        else if(p['left']) {
             this.currentDirection = "left";
         }
-        if(p['right']) {
+        else if(p['right']) {
             this.currentDirection = "right";
         }
-        if(p['up'] && p['left']) {
-            this.currentDirection = "upLeft";
-        }
-        if(p['up'] && p['right']) {
-            this.currentDirection = "upRight";
-        }
-        if(p['down'] && p['left']) {
-            this.currentDirection = "downLeft";
-        }
-        if(p['down'] && p['right']) {
-            this.currentDirection = "downRight";
-        }
+
     }
     
 }

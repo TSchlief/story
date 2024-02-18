@@ -16,80 +16,80 @@ export default class EventController {
         this.scene = undefined;
         this.loading = false;
 
+
     }
 
     async triggerEvent(event) {
-        let didEvent = false;
+        
         // If loading stop events
         if(this.loading) {return}
+
+        // Non-blocking events
         if(event.longSound){
-            didEvent = true;
             this.audioController.playLongSound(event.longSound);
         }
         if(event.soundEffect){
-            didEvent = true;
             this.audioController.playSoundEffect(event.soundEffect);
         }
         if(event.music){
-            didEvent = true;
             this.audioController.playMusic(event.music);
         }
-        if(event.door){
-            this.loadScene(event.door)
+        if(event.lightOn) {
+            this.lightingController.onLight(event.lightOn);
         }
-        else if(event.dialog){
-            const result = await this.dialogController.handleDialog(event.dialog);
+        if(event.lightOff) {
+            this.lightingController.offLight(event.lightOff);
+        }
+        if(event.lightToggle) {
+            this.lightingController.toggleLight(event.lightToggle);
+        }
 
+        // Blocking events
+        if(event.dialog){
+            const result = await this.dialogController.handleDialog(event.dialog);
+            // Unlock event if unlockEvent
+            if(result.unlockEvent){
+                this.lockedEvents[result.unlockEvent] = true;
+            }
             // Load scene if destination
             if(result.dest){
-                this.loadScene(result.dest);
+                this.loadScene(result.dest, result.playerLocation);
             }
             if(result.dialog){
                 this.triggerEvent({dialog: result.dialog})
             }
-            console.log("dialog Results",result)
         }
-        else if(event.lightOn) {
-            this.lightingController.onLight(event.lightOn);
+        else if(event.door){
+            this.loadScene(event.door, event.playerLocation)
         }
-        else if(event.lightOff) {
-            this.lightingController.offLight(event.lightOff);
-        }
-        else if(event.lightToggle) {
-            this.lightingController.toggleLight(event.lightToggle);
-        }
-        else{
-            if(!didEvent){
-                console.error("unhandled event!", event.lightOn)
-            }
-        }
+   
     }
 
-    async loadScene(sceneName){
+    async loadScene(sceneName, playerStartingLocation){
         this.loading = true;
-
+        // If there is already a scene loaded we need to clean up the scene
         if(this.scene){
             this.scene.characterController.isEnabled=false;
             await this.lightingController.fadeOut()
             this.scene.cleanUp();
             this.audioController.cleanUp(sceneName);
         }
+        // No scene loaded so just load one up
         else{
             this.audioController.sceneStart(sceneName)
         }
-        
-
+        // Dynamicly import scene file
         const module = await import(`../scenes/${sceneName}.js`)
         
         const loadedModule = async (module) => {
             const SceneClass = module.default;
-          
 
             // Create a new scene
             this.scene = new SceneClass({
                 eventController: this,
                 inputController: this.inputController,
                 lightingController: this.lightingController,
+                playerStartingLocation,
             });
             // Update dialog controeller with new scene
             this.dialogController.currentScene = this.scene;
@@ -105,7 +105,7 @@ export default class EventController {
 
     splashScreenInit(){
         this.audioController.init();
-        this.loadScene("startSceneBedroom");
+        this.loadScene("chapter1/bedroom", {x:-50, y: 10});
     }
 
 

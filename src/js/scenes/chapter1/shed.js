@@ -21,7 +21,7 @@ export default class startScene extends Scene{
         })
         
         this.player = new Sprite({
-            position: {x:0, y: 0},
+            position: this.playerStartingLocation,
             boundingRect: {top:-28, left:-1, right:-1},
             parent: this.map,
             image: "/src/img/thorn.png"

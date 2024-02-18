@@ -1,10 +1,11 @@
 import Dialog from "../libraries/dialog.js";
 
+// Processes dialog objects and calls events
 export default class DialogController {
     constructor(config) {
-        this.dialog = new Dialog();
-        this.inputController = config.inputController
-        this.inputController.setDialogRemote(this.input.bind(this))
+        this.dialog = new Dialog(); // Get the dialog library
+        this.inputController = config.inputController // We need the input controller to navigate dialog
+        this.inputController.setDialogRemote(this.input.bind(this)) // When we set this remote. InputController will call 
         this.audioController = config.audioController;
         this.currentScene = undefined;
         this.dialogWrapper = document.getElementById('dialogWrapper');
@@ -36,6 +37,11 @@ export default class DialogController {
         // Add destination to result
         if(request.dest){
             result.dest = request.dest;
+            result.playerLocation = request.playerLocation;
+        }
+        // Add any event Unlocks to result
+        if(request.unlockEvent){
+            result.unlockEvent = request.unlockEvent;
         }
         // Check if forwarding is defined
         if(request.forwarding){
@@ -43,7 +49,6 @@ export default class DialogController {
             if(request.forwarding[0] !== 0){
                 // Foward to next dialog
                 // The first item in forwarding is the index to choose
-                console.log("forwarding")
                 const newCode = request.forwarding[request.forwarding[0]];
                 if(newCode === 0){
                     this.currentScene.characterController.isEnabled = true;

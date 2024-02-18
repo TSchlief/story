@@ -30,20 +30,23 @@ export default class Sounds{
                 fileName: "surrealGameMenuLooping.mp3",
             },
 
-            startSceneBedroom:{
+            "chapter1/bedroom":{
                 fileName: "melt.mp3",
-                next: "hallway",
-                start:70
+                next: "chapter1/bedroom",
             },
 
-            hallway:{
-                fileName: "peacefulMind.mp3",
-                looping: true,
+            "chapter1/hallway":{
+                fileName: "melt.mp3",
+                next: "chapter1/hallway",
+            },
+
+            "chapter1/kaiosBedroom":{
+                fileName: "darkQuest.mp3",
+                next: "chapter1/kaiosBedroom",
             },
 
             acreageScene:{
                 fileName: "peacefulMind.mp3",
-                looping: true,
             },
 
         }
